@@ -67,7 +67,7 @@ class Game:
             self.draw_start_scene()
 
         elif self.scene == "game":
-            self.draw_game()
+            self.draw_play()
 
     
     def draw_start_scene(self):
@@ -86,7 +86,7 @@ class Game:
         if pyxel.btnp(pyxel.KEY_RETURN):
             self.scene = "game"
 
-    def draw_game(self):
+    def draw_play(self):
         pyxel.camera() #reset camera
         pyxel.rect(0, 0, 128, 128, helpers.NAVY)
 

@@ -1,4 +1,5 @@
-# adapted from example code at https://github.com/kitao/pyxel/tree/main/python/pyxel/examples
+# adapted from example code with the help of Github copilot 
+# https://github.com/kitao/pyxel/tree/main/python/pyxel/examples
 
 import pyxel
 from sprite import Sprite
