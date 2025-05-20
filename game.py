@@ -9,7 +9,10 @@ import helpers
 
 class Game:
     def __init__(self):
-        pyxel.init(128, 128, title="Pyxel Platformer")
+        self.width = 128
+        self.height = 128
+
+        pyxel.init(self.width, self.height, title="Pyxel Platformer")
         pyxel.load("assets.pyxres")
 
         self.player = Player(
@@ -17,16 +20,14 @@ class Game:
             u=5*8,              # first number is X cordinate in map editor
             w=0, 
             width=8, 
-            height=8)
+            height=16)          # each square is 1 pixel
         
         self.coin_list = []
         self.setup_map_sprites()
-
-        # pyxel.playm(0, loop=True) #music
         
         self.camera_x = 0
-        self.scroll_border_X = 80
         self.camera_y = 0
+        self.scroll_border_X = 80
         self.scroll_border_Y = 80
 
         self.score = 0
@@ -51,10 +52,8 @@ class Game:
                         img_bank=0, 
                         u=4 * 8,        # first number is X cordinate in map editor
                         w=0 * 8, 
-                        width=8, 
-                        height=8,
-                        scale=0.5
-                    )
+                        width=4, 
+                        height=4                    )
 
                     coin.set_xy(x * 8, y * 8)              
                     self.coin_list.append(coin)
@@ -72,8 +71,17 @@ class Game:
 
     
     def draw_start_scene(self):
-        pyxel.text(35, 66, "Simple Platformer", pyxel.frame_count % 16)  #cycle through color options
-        pyxel.text(31, 100, "- PRESS ENTER to start-", 13)
+        pyxel.text(
+            x=helpers.center_text("Simple Platformer", self.width, char_width=pyxel.FONT_WIDTH),
+            y = self.height/2, 
+            s= "Simple Platformer", 
+            col = pyxel.frame_count % 16)  #cycle through color options
+        
+        pyxel.text(
+            x = helpers.center_text("- PRESS ENTER to start-", self.width, char_width=pyxel.FONT_WIDTH), 
+            y = self.height/1.5, 
+            s = "- PRESS ENTER to start-", 
+            col = 13)
 
         if pyxel.btnp(pyxel.KEY_RETURN):
             self.scene = "game"
@@ -85,7 +93,8 @@ class Game:
         # draw map
         pyxel.bltm(0, 0, 0, self.camera_x, self.camera_y, 128, 128, colkey=helpers.COLKEY)
 
-        pyxel.camera(self.camera_x, self.camera_y) #move camera 
+        # draw camera
+        pyxel.camera(self.camera_x, self.camera_y) 
 
         self.player.draw()
 
@@ -100,12 +109,13 @@ class Game:
   
         self.player.update(self.camera_x)
 
+        # update camera based on player
         self.camera_x, self.camera_y = self.player.update_scroll(
             self.camera_x, 
-            self.scroll_border_X,
             self.camera_y, 
+            self.scroll_border_X,
             self.scroll_border_Y)
-
+        
         for coin in self.coin_list:
             if self.player.collides_with(coin) and coin.is_active():
                 self.score += 1

@@ -36,48 +36,40 @@ class Player(Sprite):
             self.direction = 1
         else:
             self.dx = 0
+
+        # Handle jumping
+        self.dy = min(self.dy + 1, self.gravity)
+        if pyxel.btnp(pyxel.KEY_SPACE) and not self.is_falling and not self.is_jumping:
+            self.dy = -self.jump_strength
+            self.is_jumping = True
         
         # Ensure player stays within screen bounds
         self.x = max(self.x, scroll_x)
         self.y = max(self.y, 0)
 
-        # Update falling state
-        self.is_falling = self.y > last_y
-        # Apply gravity
-        self.dy = min(self.dy + 1, self.gravity)
-
         # Update position with collision handling
         self.x, self.y = self.push_back(self.x, self.y, self.dx, self.dy)
 
-    
+        # Update falling state
+        self.is_falling = self.y > last_y
         if self.dy >= self.gravity:
             self.is_jumping = False
 
-        # Handle jumping
-        if pyxel.btnp(pyxel.KEY_SPACE) and not self.is_falling and not self.is_jumping:
-            self.dy = -self.jump_strength
-            self.is_jumping = True
                         
-
-    def update_scroll(self, camera_x, scroll_border_x, camera_y, scroll_border_y):
-         #right scroll
+    def update_scroll(self, camera_x, camera_y, scroll_border_x, scroll_border_y):
+        # Horizontal scroll
         if self.x > camera_x + scroll_border_x:
             camera_x = min(self.x - scroll_border_x, 184)
+        elif self.x < camera_x + scroll_border_x:
+            camera_x = max(self.x - scroll_border_x, 0)
 
-        # left scroll
-        elif self.x + 20 > scroll_border_x:  
-            camera_x = max(self.x - scroll_border_x,0)
+        # Vertical scroll
+        if self.y > camera_y + scroll_border_y:
+            camera_y = min(self.y - scroll_border_y, helpers.FLOOR_Y)
+        elif self.y < camera_y + scroll_border_y:
+            camera_y = max(self.y - scroll_border_y, 0)
 
-        # down scroll
-        if self.y >= helpers.FLOOR_Y:
-            target_camera_y = abs(helpers.FLOOR_Y - self.y) + 16
-            camera_y += min(5, target_camera_y - camera_y)
-            
-        # up scroll
-        elif self.y < helpers.FLOOR_Y:
-            camera_y -= min(2, camera_y) 
-
-        return (camera_x,camera_y)
+        return camera_x, camera_y
 
 
         
