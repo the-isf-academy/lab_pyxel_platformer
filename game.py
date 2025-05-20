@@ -1,4 +1,5 @@
 # this file is based of the offical documentation
+# https://github.com/kitao/pyxel?tab=readme-ov-file#how-to-use
 ###################################################
 
 import pyxel
@@ -92,7 +93,7 @@ class Game:
             if coin.is_active() == True:
                 coin.draw()
 
-        pyxel.text(self.camera_x, 4, f"SCORE {self.score}",7) # x, y, text, color
+        pyxel.text(self.camera_x, self.camera_y, f"SCORE {self.score}",helpers.BLACK) # x, y, text, color
 
 
     def update(self):

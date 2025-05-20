@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "retro-testing"
+name = "lab_pyxel_platformer"
 version = "0.1.0"
 description = ""
 authors = ["emma <eqbrown@isf.edu.hk>"]
