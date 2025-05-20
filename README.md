@@ -1,3 +1,10 @@
-# Install steps
+# Install steps using Poetry
+`poetry install`
+`poetry shell`
 
-`pip3 install `pyxel`
+# To run
+`python game.py`
+
+# To edit assets
+`pyxel edit assets.pyxres`
+
