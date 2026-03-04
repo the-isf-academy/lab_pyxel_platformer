@@ -5,57 +5,65 @@
 import pyxel
 from player import Player
 from coin import Coin
+from camera import Camera
 import helpers
 
 class Game:
     def __init__(self):
-        self.width = 128
-        self.height = 128
+        self.width = 64*2
+        self.height = 64*2
 
         pyxel.init(self.width, self.height, title="Pyxel Platformer")
         pyxel.load("assets.pyxres")
 
         self.player = Player(
-            img_bank=0, 
-            u=5*8,              # first number is X cordinate in map editor
-            w=0, 
-            width=8, 
-            height=16)          # each square is 1 pixel
-        
+            img_bank = 0, 
+            editX = 40, 
+            editY = 0, 
+            width = 8, 
+            height = 8*2,
+            scale = 1)
+          
         self.coin_list = []
+        
         self.setup_map_sprites()
         
-        self.camera_x = 0
-        self.camera_y = 0
-        self.scroll_border_X = 80
-        self.scroll_border_Y = 80
+        self.camera = Camera(
+            x = 0,
+            y = 0,
+            max_x = self.width,
+            max_y = self.height,
+        )
 
         self.score = 0
-        self.scene = "start"
+
+        self.scene = "start_screen"
 
         pyxel.run(self.update, self.draw)
     
     def setup_map_sprites(self):
         for y in range(pyxel.tilemap(0).height):
             for x in range(pyxel.tilemap(0).width):
-                tile = helpers.get_tile(x, y)
+                tile = pyxel.tilemaps[0].pget(x, y)
 
                 if tile == helpers.PLAYER_TILE:
-                    self.player.set_xy(x * 8, y * 8)   
-                    for yi in range(y, y + (self.player.height // 8)):
-                        for xi in range(x, x + (self.player.width // 8)):
-                            pyxel.tilemap(0).pset(xi, yi, helpers.TRANSPARENT_TILE)
+                    self.player.set_pos(x * 8, y * 8)   
+
+                    for tileY in range(y, y + (self.player.height // 8)):
+                        for tileX in range(x, x + (self.player.width // 8)):
+                            pyxel.tilemaps[0].pset(tileX, tileY, helpers.TRANSPARENT_TILE)
  
 
                 if tile == helpers.COIN_TILE:
                     coin = Coin(
-                        img_bank=0, 
-                        u=4 * 8,        # first number is X cordinate in map editor
-                        w=0 * 8, 
-                        width=4, 
-                        height=4                    )
+                        img_bank = 0, 
+                        editX = 24, 
+                        editY = 0, 
+                        width = 8, 
+                        height = 8,
+                        scale = 0.5)
 
-                    coin.set_xy(x * 8, y * 8)              
+                    coin.set_pos(x * 8, y * 8)              
                     self.coin_list.append(coin)
                 
                     pyxel.tilemap(0).pset(x, y, helpers.TRANSPARENT_TILE)  
@@ -63,62 +71,78 @@ class Game:
     def draw(self):
         pyxel.cls(0)    # clear screen
 
-        if self.scene == "start":
+        if self.scene == "start_screen":
             self.draw_start_scene()
 
-        elif self.scene == "game":
+        elif self.scene == "play_game":
             self.draw_play()
 
-    
+    def draw_map(self, mapX, mapY, cameraX, cameraY):
+        """Handles how the map is drawn"""
+
+        pyxel.bltm(
+            x= mapX, 
+            y = mapY, 
+            tm = 0, 
+            u = cameraX, 
+            v = cameraY, 
+            w = self.width, 
+            h = self.height, 
+            colkey=helpers.COLKEY)
+        
+
+        
     def draw_start_scene(self):
         pyxel.text(
-            x=helpers.center_text("Simple Platformer", self.width, char_width=pyxel.FONT_WIDTH),
+            x = self.width//2 - 30,
             y = self.height/2, 
             s= "Simple Platformer", 
             col = pyxel.frame_count % 16)  #cycle through color options
         
         pyxel.text(
-            x = helpers.center_text("- PRESS ENTER to start-", self.width, char_width=pyxel.FONT_WIDTH), 
+            x = self.width//2 - 40, 
             y = self.height/1.5, 
             s = "- PRESS ENTER to start-", 
             col = 13)
 
         if pyxel.btnp(pyxel.KEY_RETURN):
-            self.scene = "game"
+            self.scene = "play_game"
 
     def draw_play(self):
         pyxel.camera() #reset camera
-        pyxel.rect(0, 0, 128, 128, helpers.NAVY)
+        pyxel.rect(0, 0, 128, 128, helpers.NAVY)    # draws background
 
         # draw map
-        pyxel.bltm(0, 0, 0, self.camera_x, self.camera_y, 128, 128, colkey=helpers.COLKEY)
+        self.draw_map(0, 0, self.camera.x, self.camera.y)
 
         # draw camera
-        pyxel.camera(self.camera_x, self.camera_y) 
+        pyxel.camera(self.camera.x, self.camera.y)
 
+        # draws Player
         self.player.draw()
 
+        # draws Coins if active
         for coin in self.coin_list:
-            if coin.is_active() == True:
+            if coin.active == True:
                 coin.draw()
 
-        pyxel.text(self.camera_x, self.camera_y, f"SCORE {self.score}",helpers.BLACK) # x, y, text, color
+        # draws score relative to camera position 
+        pyxel.text(self.camera.x, self.camera.y, f"SCORE {self.score}", helpers.BLACK) # x, y, text, color
 
 
     def update(self):
-  
-        self.player.update(self.camera_x)
-
-        # update camera based on player
-        self.camera_x, self.camera_y = self.player.update_scroll(
-            self.camera_x, 
-            self.camera_y, 
-            self.scroll_border_X,
-            self.scroll_border_Y)
+        # Moves the Player
+        self.player.movement()
         
+        # Checks if Player collides with a Coin
         for coin in self.coin_list:
-            if self.player.collides_with(coin) and coin.is_active():
+            if self.player.collides_with(coin) and coin.active == True:
                 self.score += 1
-                coin.inactivate()
+                coin.set_active(False)
+
+
+        # update camera based on Player position
+        self.camera.follow_player(self.player.posX, self.player.posY)
+
 
 Game()

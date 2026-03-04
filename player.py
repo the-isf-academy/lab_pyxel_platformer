@@ -2,75 +2,139 @@
 # https://github.com/kitao/pyxel/tree/main/python/pyxel/examples
 
 import pyxel
-from sprite import Sprite
 import helpers 
 
-class Player(Sprite):
-    def __init__(self, img_bank, u, w, width, height, scale=1):
-        super().__init__(img_bank, u, w, width, height, scale)
+class Player:
+    def __init__(self, img_bank, editX, editY, width, height, scale):
+        # drawing the Player
+        self.img_bank = img_bank
+        self.width = width
+        self.height = height
+        self.editX = editX
+        self.editY = editY
+        self.scale = scale
 
-        self.x = 0
-        self.y = 0
+        # position
+        self.posX = 0
+        self.posY = 0
 
-        self.dx = 0
-        self.dy = 0
-        
+        # movement
+        self.velocityX = 0
+        self.velocityY = 0
         self.speed = 2
         self.gravity = 5
-        self.direction = 1
+        self.direction = 1  # 1 = right; -1 = left
 
+        # jumping
         self.jump_strength = 10
         self.is_falling = False
-
         self.is_jumping = False
 
-    def update(self, scroll_x):
-        last_y = self.y
+    def set_pos(self, x, y):
+        '''Set posX, posY position'''
+
+        self.posX = x
+        self.posY = y
+
+    def draw(self):
+        '''Draw Player at current location'''
+
+        pyxel.blt(
+            self.posX, 
+            self.posY, 
+            self.img_bank, 
+            self.editX, 
+            self.editY, 
+            self.width, 
+            self.height, 
+            colkey=helpers.COLKEY,
+            scale = self.scale)
+
+    def movement(self):
+        last_y = self.posY
 
         # Handle horizontal movement
         if pyxel.btn(pyxel.KEY_LEFT):
-            self.dx = -self.speed
+            self.velocityX = -self.speed
             self.direction = -1
 
         elif pyxel.btn(pyxel.KEY_RIGHT):
-            self.dx = self.speed
+            self.velocityX = self.speed
             self.direction = 1
         else:
-            self.dx = 0
-
-        # Handle jumping
-        self.dy = min(self.dy + 1, self.gravity)
-        if pyxel.btnp(pyxel.KEY_SPACE) and not self.is_falling and not self.is_jumping:
-            self.dy = -self.jump_strength
-            self.is_jumping = True
+            self.velocityX = 0
         
-        # Ensure player stays within screen bounds
-        self.x = max(self.x, scroll_x)
-        self.y = max(self.y, 0)
+        # Apply gravity 
+        self.apply_gravity()
+        
+        # Handle jumping
+        self.jumping()
 
-        # Update position with collision handling
-        self.x, self.y = self.push_back(self.x, self.y, self.dx, self.dy)
+        # Ensure player stops at walls
+        self.push_back()
 
         # Update falling state
-        self.is_falling = self.y > last_y
-        if self.dy >= self.gravity:
+        self.is_falling = self.posY > last_y
+
+    def apply_gravity(self):
+        self.velocityY = min(self.velocityY + 1, self.gravity)
+
+    
+    def jumping(self):
+        if pyxel.btnp(pyxel.KEY_SPACE) and not self.is_falling and not self.is_jumping:
+            self.velocityY = -self.jump_strength
+            self.is_jumping = True
+
+        if self.velocityY >= self.gravity:
             self.is_jumping = False
 
-                        
-    def update_scroll(self, camera_x, camera_y, scroll_border_x, scroll_border_y):
-        # Horizontal scroll
-        if self.x > camera_x + scroll_border_x:
-            camera_x = min(self.x - scroll_border_x, 184)
-        elif self.x < camera_x + scroll_border_x:
-            camera_x = max(self.x - scroll_border_x, 0)
 
-        # Vertical scroll
-        if self.y > camera_y + scroll_border_y:
-            camera_y = min(self.y - scroll_border_y, helpers.FLOOR_Y)
-        elif self.y < camera_y + scroll_border_y:
-            camera_y = max(self.y - scroll_border_y, 0)
+    def push_back(self):
+        """Move player back if it hits a wall"""
+        
+        # Vertical movement
+        step_y = 1 if self.velocityY > 0 else -1
+        for i in range(abs(int(self.velocityY))):
+            if self.is_colliding(self.posX, self.posY + step_y, helpers.WALL_TILE_POSITIONS):
+                break
+            self.posY += step_y
 
-        return camera_x, camera_y
+        # Horizontal movement
+        step_x = 1 if self.velocityX > 0 else -1
+        for i in range(abs(int(self.velocityX))):
+            if self.is_colliding(self.posX + step_x, self.posY, helpers.WALL_TILE_POSITIONS):
+                break
+            self.posX += step_x
+                    
+    
+    def is_colliding(self, x, y, tiles):
+        '''Checks if Player is colliding with a specific tiles'''
+
+        # Calculate the tile range based on the sprite's width and height
+        x1 = pyxel.floor(x) // 8
+        y1 = pyxel.floor(y) // 8
+        x2 = pyxel.floor(x + self.width - 1) // 8
+        y2 = pyxel.floor(y + self.height - 1) // 8
+
+        # Check for collisions within the tile range
+        for tileY in range(y1, y2 + 1):
+            for tileX in range(x1, x2 + 1):
+                if pyxel.tilemaps[0].pget(tileX, tileY) in tiles:
+                    return True
+
+        return False
+
+
+    def collides_with(self, other_sprite):
+        '''Check is Player collides with another Sprite'''
+
+        return (
+            self.posX < other_sprite.posX + other_sprite.width and
+            self.posX + self.width > other_sprite.posX and
+            self.posY < other_sprite.posY + other_sprite.height and
+            self.posY + self.height > other_sprite.posY
+        )
+
 
 
         
