@@ -57,11 +57,11 @@ class Game:
                 if tile == helpers.COIN_TILE:
                     coin = Coin(
                         img_bank = 0, 
-                        editX = 24, 
-                        editY = 0, 
-                        width = 8, 
-                        height = 8,
-                        scale = 0.5)
+                        editX = 26, 
+                        editY = 2, 
+                        width = 4, 
+                        height = 4,
+                        scale = 1)
 
                     coin.set_pos(x * 8, y * 8)              
                     self.coin_list.append(coin)
