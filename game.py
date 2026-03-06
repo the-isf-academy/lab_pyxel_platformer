@@ -130,6 +130,8 @@ class Game:
         # draws Player
         self.player.draw()
 
+        self.player.draw_bullets()
+
         # draws Coins if active
         for coin in self.coin_list:
             if coin.active == True:
@@ -144,6 +146,8 @@ class Game:
 
         # Moves the Player
         self.player.movement()
+        self.player.shooting()
+        self.player.update_bullets()
         
         # Checks if Player collides with a Coin
         for coin in self.coin_list:

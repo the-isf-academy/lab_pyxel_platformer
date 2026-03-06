@@ -3,6 +3,8 @@
 
 import pyxel
 import helpers 
+from bullet import Bullet
+
 
 class Player:
     def __init__(self, img_bank, editX, editY, width, height, scale):
@@ -30,6 +32,9 @@ class Player:
         self.is_falling = False
         self.is_jumping = False
 
+
+        self.bullets = []
+
     def set_pos(self, x, y):
         '''Set posX, posY position'''
 
@@ -49,6 +54,21 @@ class Player:
             self.height, 
             colkey=helpers.COLKEY,
             scale = self.scale)
+        
+    def draw_bullets(self):
+        if len(self.bullets) > 0:
+            print(self.bullets)
+
+            for bullet in self.bullets:
+                print('draw b')
+                bullet.draw()
+
+    def update_bullets(self):
+         if len(self.bullets) > 0:
+
+            for bullet in self.bullets:
+                bullet.movement()
+
 
     def movement(self):
         """Controls how the Player moves"""
@@ -77,6 +97,22 @@ class Player:
 
         # Update falling state
         self.is_falling = self.posY > last_y
+
+
+    def shooting(self):
+        if pyxel.btnp(pyxel.KEY_S):
+            bullet = Bullet(
+                        img_bank = 0, 
+                        editX = 48, 
+                        editY = 2, 
+                        width = 5, 
+                        height = 4,
+                        scale = 1)
+
+            bullet.set_pos(self.posX + (self.width * self.direction), self.posY)  
+            self.bullets.append(bullet)
+        
+            print('shoot')
 
     def apply_gravity(self):
         """Controls the gravity effects"""
