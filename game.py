@@ -1,5 +1,6 @@
 # this file is based of the offical documentation
 # https://github.com/kitao/pyxel?tab=readme-ov-file#how-to-use
+# https://kitao.github.io/pyxel/wasm/api-reference/
 ###################################################
 
 import pyxel
@@ -42,6 +43,8 @@ class Game:
         pyxel.run(self.update, self.draw)
     
     def setup_map_sprites(self):
+        """Reads in the map data and sets up Sprites"""
+        
         for y in range(pyxel.tilemap(0).height):
             for x in range(pyxel.tilemap(0).width):
                 tile = pyxel.tilemaps[0].pget(x, y)
@@ -69,6 +72,8 @@ class Game:
                     pyxel.tilemap(0).pset(x, y, helpers.TRANSPARENT_TILE)  
 
     def draw(self):
+        """Controls what is drawn on the screen"""
+
         pyxel.cls(0)    # clear screen
 
         if self.scene == "start_screen":
@@ -93,6 +98,8 @@ class Game:
 
         
     def draw_start_scene(self):
+        """Controls what is drawn on the start screen"""
+
         pyxel.text(
             x = self.width//2 - 30,
             y = self.height/2, 
@@ -109,6 +116,8 @@ class Game:
             self.scene = "play_game"
 
     def draw_play(self):
+        """Controls what is drawn when the game is being played"""
+
         pyxel.camera() #reset camera
         pyxel.rect(0, 0, 128, 128, helpers.NAVY)    # draws background
 
@@ -131,6 +140,8 @@ class Game:
 
 
     def update(self):
+        """Controls what happens each frame of the game"""
+
         # Moves the Player
         self.player.movement()
         

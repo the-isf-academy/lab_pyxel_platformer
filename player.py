@@ -22,7 +22,7 @@ class Player:
         self.velocityX = 0
         self.velocityY = 0
         self.speed = 2
-        self.gravity = 5
+        self.gravity = 1.0
         self.direction = 1  # 1 = right; -1 = left
 
         # jumping
@@ -51,6 +51,8 @@ class Player:
             scale = self.scale)
 
     def movement(self):
+        """Controls how the Player moves"""
+
         last_y = self.posY
 
         # Handle horizontal movement
@@ -77,10 +79,13 @@ class Player:
         self.is_falling = self.posY > last_y
 
     def apply_gravity(self):
-        self.velocityY = min(self.velocityY + 1, self.gravity)
+        """Controls the gravity effects"""
 
+        self.velocityY += self.gravity
     
     def jumping(self):
+        """Controls keyboard press for jumping and jumping mechanic"""
+
         if pyxel.btnp(pyxel.KEY_SPACE) and not self.is_falling and not self.is_jumping:
             self.velocityY = -self.jump_strength
             self.is_jumping = True
@@ -90,7 +95,10 @@ class Player:
 
 
     def push_back(self):
-        """Move player back if it hits a wall"""
+        """Moves Player back if it hits a wall
+        
+            Do not edit this method.
+        """
         
         # Vertical movement
         step_y = 1 if self.velocityY > 0 else -1
@@ -108,7 +116,10 @@ class Player:
                     
     
     def is_colliding(self, x, y, tiles):
-        '''Checks if Player is colliding with a specific tiles'''
+        '''Checks if Player is colliding with a specific tiles
+        
+            Do not edit this method.
+        '''
 
         # Calculate the tile range based on the sprite's width and height
         x1 = pyxel.floor(x) // 8
@@ -126,7 +137,10 @@ class Player:
 
 
     def collides_with(self, other_sprite):
-        '''Check is Player collides with another Sprite'''
+        '''Check is Player collides with another Sprite
+        
+            Do not edit this method.
+        '''
 
         return (
             self.posX < other_sprite.posX + other_sprite.width and
