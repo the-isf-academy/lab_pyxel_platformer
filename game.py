@@ -7,6 +7,7 @@ import pyxel
 from player import Player
 from coin import Coin
 from camera import Camera
+from enemy import Enemy
 import helpers
 
 class Game:
@@ -26,6 +27,8 @@ class Game:
             scale = 1)
           
         self.coin_list = []
+
+        self.enemy = None
         
         self.setup_map_sprites()
         
@@ -68,6 +71,20 @@ class Game:
 
                     coin.set_pos(x * 8, y * 8)              
                     self.coin_list.append(coin)
+                
+                    pyxel.tilemap(0).pset(x, y, helpers.TRANSPARENT_TILE)  
+
+                if tile == helpers.ENEMY_TILE:
+                    print('enemy')
+                    self.enemy = Enemy(
+                        img_bank = 0, 
+                        editX = 58, 
+                        editY = 5, 
+                        width = 5, 
+                        height = 3,
+                        scale = 1)
+
+                    self.enemy.set_pos(x * 8, y * 8)              
                 
                     pyxel.tilemap(0).pset(x, y, helpers.TRANSPARENT_TILE)  
 
@@ -132,6 +149,8 @@ class Game:
 
         self.player.draw_bullets()
 
+        self.enemy.draw()
+
         # draws Coins if active
         for coin in self.coin_list:
             if coin.active == True:
@@ -147,7 +166,9 @@ class Game:
         # Moves the Player
         self.player.movement()
         self.player.shooting()
-        self.player.update_bullets()
+        self.player.update_bullets(64*4, self.coin_list)
+
+        self.enemy.movement()
         
         # Checks if Player collides with a Coin
         for coin in self.coin_list:

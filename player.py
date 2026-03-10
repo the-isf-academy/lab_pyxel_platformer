@@ -56,18 +56,23 @@ class Player:
             scale = self.scale)
         
     def draw_bullets(self):
-        if len(self.bullets) > 0:
-            print(self.bullets)
+        for bullet in self.bullets:
+            bullet.draw()
 
-            for bullet in self.bullets:
-                print('draw b')
-                bullet.draw()
+    def update_bullets(self, screen_width, coin_list):
+        """Move bullet and check if goes off the screen or hits a coin"""
+        
+        for bullet in self.bullets:
+            bullet.movement()
 
-    def update_bullets(self):
-         if len(self.bullets) > 0:
+            if bullet.posX > screen_width:
+                self.bullets.remove(bullet)
 
-            for bullet in self.bullets:
-                bullet.movement()
+            for coin in coin_list:
+
+                if bullet.collides_with(coin):
+                    coin.set_active(False)
+                    self.bullets.remove(bullet)
 
 
     def movement(self):

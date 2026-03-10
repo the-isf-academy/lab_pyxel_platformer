@@ -1,7 +1,7 @@
 import pyxel
 import helpers
 
-class Bullet:
+class Enemy:
     def __init__(self, img_bank, editX, editY, width, height, scale):
         self.img_bank = img_bank
         self.width = width
@@ -13,7 +13,7 @@ class Bullet:
         self.posX = 0
         self.posY = 0
 
-        self.speed = 2
+        self.speed = .5
 
 
     def set_pos(self, x, y):
@@ -38,22 +38,8 @@ class Bullet:
 
     
     def movement(self):
-        self.posX += self.speed
-
-    def collides_with(self, other_sprite):
-        '''Check is Player collides with another Sprite
-        
-            Do not edit this method.
-        '''
-
-        return (
-            self.posX < other_sprite.posX + other_sprite.width and
-            self.posX + self.width > other_sprite.posX and
-            self.posY < other_sprite.posY + other_sprite.height and
-            self.posY + self.height > other_sprite.posY
-        )
- 
-
+        for i in range(3):
+            self.direction*= -1
 
 
 
