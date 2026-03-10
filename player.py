@@ -22,11 +22,12 @@ class Player:
         self.velocityX = 0
         self.velocityY = 0
         self.speed = 2
-        self.gravity = 1.0
+        self.gravity = .8
         self.direction = 1  # 1 = right; -1 = left
 
-        # jumping
+        # jumping and falling
         self.jump_strength = 10
+        self.max_fall_speed = 8 
         self.is_falling = False
         self.is_jumping = False
 
@@ -82,7 +83,12 @@ class Player:
         """Controls the gravity effects"""
 
         self.velocityY += self.gravity
-    
+        
+        # Cap falling speed to prevent too-drastic falls
+        self.velocityY = min(self.velocityY, self.max_fall_speed)
+      
+            
+
     def jumping(self):
         """Controls keyboard press for jumping and jumping mechanic"""
 
