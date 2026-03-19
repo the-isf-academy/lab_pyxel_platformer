@@ -51,7 +51,7 @@ class Player:
             colkey=helpers.COLKEY,
             scale = self.scale)
 
-    def movement(self):
+    def movement(self, tile_map):
         """Controls how the Player moves"""
 
         last_y = self.posY
@@ -74,7 +74,7 @@ class Player:
         self.jumping()
 
         # Ensure player stops at walls
-        self.push_back()
+        self.push_back(tile_map)
 
         # Update falling state
         self.is_falling = self.posY > last_y
@@ -100,7 +100,7 @@ class Player:
             self.is_jumping = False
 
 
-    def push_back(self):
+    def push_back(self, tile_map):
         """Moves Player back if it hits a wall
         
             Do not edit this method.
@@ -109,19 +109,19 @@ class Player:
         # Vertical movement
         step_y = 1 if self.velocityY > 0 else -1
         for i in range(abs(int(self.velocityY))):
-            if self.is_colliding(self.posX, self.posY + step_y, helpers.WALL_TILE_POSITIONS):
+            if self.is_colliding(self.posX, self.posY + step_y, helpers.WALL_TILE_POSITIONS, tile_map):
                 break
             self.posY += step_y
 
         # Horizontal movement
         step_x = 1 if self.velocityX > 0 else -1
         for i in range(abs(int(self.velocityX))):
-            if self.is_colliding(self.posX + step_x, self.posY, helpers.WALL_TILE_POSITIONS):
+            if self.is_colliding(self.posX + step_x, self.posY, helpers.WALL_TILE_POSITIONS, tile_map):
                 break
             self.posX += step_x
                     
     
-    def is_colliding(self, x, y, tiles):
+    def is_colliding(self, x, y, tiles, tile_map):
         '''Checks if Player is colliding with a specific tiles
         
             Do not edit this method.
@@ -136,7 +136,7 @@ class Player:
         # Check for collisions within the tile range
         for tileY in range(y1, y2 + 1):
             for tileX in range(x1, x2 + 1):
-                if pyxel.tilemaps[0].pget(tileX, tileY) in tiles:
+                if pyxel.tilemaps[tile_map].pget(tileX, tileY) in tiles:
                     return True
 
         return False

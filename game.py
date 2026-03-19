@@ -27,7 +27,9 @@ class Game:
           
         self.coin_list = []
         
-        self.setup_map_sprites()
+        self.level = 0
+
+        self.setup_map_sprites(self.level )
         
         self.camera = Camera(
             x = 0,
@@ -40,21 +42,23 @@ class Game:
 
         self.scene = "start_screen"
 
+        print(pyxel.tilemaps)
+
         pyxel.run(self.update, self.draw)
     
-    def setup_map_sprites(self):
+    def setup_map_sprites(self, tile_map):
         """Reads in the map data and sets up Sprites"""
-        
-        for y in range(pyxel.tilemap(0).height):
-            for x in range(pyxel.tilemap(0).width):
-                tile = pyxel.tilemaps[0].pget(x, y)
+    
+        for y in range(pyxel.tilemap(tile_map).height):
+            for x in range(pyxel.tilemap(tile_map).width):
+                tile = pyxel.tilemaps[tile_map].pget(x, y)
 
                 if tile == helpers.PLAYER_TILE:
                     self.player.set_pos(x * 8, y * 8)   
 
                     for tileY in range(y, y + (self.player.height // 8)):
                         for tileX in range(x, x + (self.player.width // 8)):
-                            pyxel.tilemaps[0].pset(tileX, tileY, helpers.TRANSPARENT_TILE)
+                            pyxel.tilemaps[tile_map].pset(tileX, tileY, helpers.TRANSPARENT_TILE)
  
 
                 if tile == helpers.COIN_TILE:
@@ -69,7 +73,7 @@ class Game:
                     coin.set_pos(x * 8, y * 8)              
                     self.coin_list.append(coin)
                 
-                    pyxel.tilemap(0).pset(x, y, helpers.TRANSPARENT_TILE)  
+                    pyxel.tilemap(tile_map).pset(x, y, helpers.TRANSPARENT_TILE)  
 
     def draw(self):
         """Controls what is drawn on the screen"""
@@ -82,13 +86,13 @@ class Game:
         elif self.scene == "play_game":
             self.draw_play()
 
-    def draw_map(self, mapX, mapY, cameraX, cameraY):
+    def draw_map(self, mapX, mapY, cameraX, cameraY, tile_map):
         """Handles how the map is drawn"""
 
         pyxel.bltm(
             x= mapX, 
             y = mapY, 
-            tm = 0, 
+            tm = tile_map, 
             u = cameraX, 
             v = cameraY, 
             w = self.width, 
@@ -122,7 +126,7 @@ class Game:
         pyxel.rect(0, 0, 128, 128, helpers.NAVY)    # draws background
 
         # draw map
-        self.draw_map(0, 0, self.camera.x, self.camera.y)
+        self.draw_map(0, 0, self.camera.x, self.camera.y, self.level)
 
         # draw camera
         pyxel.camera(self.camera.x, self.camera.y)
@@ -139,17 +143,19 @@ class Game:
         pyxel.text(self.camera.x, self.camera.y, f"SCORE {self.score}", helpers.BLACK) # x, y, text, color
 
 
+
     def update(self):
         """Controls what happens each frame of the game"""
 
         # Moves the Player
-        self.player.movement()
+        self.player.movement(self.level)
         
         # Checks if Player collides with a Coin
         for coin in self.coin_list:
             if self.player.collides_with(coin) and coin.active == True:
                 self.score += 1
                 coin.set_active(False)
+                self.level = 1
 
 
         # update camera based on Player position
