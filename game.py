@@ -157,7 +157,9 @@ class Game:
             if self.player.collides_with(coin) and coin.active == True:
                 self.score += 1
                 coin.set_active(False)
+                self.increase_level()
                 
+
         # update camera based on Player position
         self.camera.follow_player(self.player.posX, self.player.posY)
 
