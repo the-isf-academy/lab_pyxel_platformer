@@ -55,7 +55,7 @@ class Game:
                 tile = pyxel.tilemaps[self.tile_map].pget(x, y)
 
                 if tile == helpers.PLAYER_TILE:
-                    self.player.set_pos(x * 8, y * 8)   
+                    self.player.set_pos(x * 8, y * 8)
 
                     for tileY in range(y, y + (self.player.height // 8)):
                         for tileX in range(x, x + (self.player.width // 8)):
@@ -85,6 +85,9 @@ class Game:
 
         elif self.scene == "play_game":
             self.draw_play()
+        
+        elif self.scene == "end_screen":
+            self.draw_end_scene()
 
     def draw_map(self, mapX, mapY, cameraX, cameraY):
         """Handles how the map is drawn"""
@@ -140,10 +143,20 @@ class Game:
         # draws score relative to camera position 
         pyxel.text(self.camera.x, self.camera.y, f"SCORE {self.score}", helpers.BLACK) # x, y, text, color
 
+    def draw_end_scene(self):
+        """Controls what is drawn on the end screen"""
+
+        pyxel.text(
+            x = self.width//4,
+            y = self.height/2, 
+            s= "GAME OVER", 
+            col = pyxel.frame_count % 16)  #cycle through color options
+    
 
     def increase_level(self):
         self.tile_map = 1
         self.coin_list = []
+        self.player.set_pos(16, 104)
         self.setup_map_sprites()
 
 
@@ -158,6 +171,12 @@ class Game:
             if self.player.collides_with(coin) and coin.active == True:
                 self.score += 1
                 coin.set_active(False)
+        
+        if self.score == 8 and self.tile_map == 0:
+            self.increase_level()
+        
+        if self.score == 14 and self.scene != "end_screen":
+            self.scene = "end_screen"
 
         # update camera based on Player position
         self.camera.follow_player(self.player.posX, self.player.posY)
