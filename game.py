@@ -8,6 +8,7 @@ from player import Player
 from coin import Coin
 from camera import Camera
 import helpers
+from time import time
 
 class Game:
     def __init__(self):
@@ -29,7 +30,10 @@ class Game:
         
         self.level1_coins = 0
 
-        self.tile_map = 0 
+        self.tile_map = 0
+
+        self.start_time = 0
+        self.end_time = 0
 
         self.setup_map_sprites()
         
@@ -119,6 +123,7 @@ class Game:
 
         if pyxel.btnp(pyxel.KEY_RETURN):
             self.scene = "play_game"
+            self.start_time = time()
 
     def draw_play(self):
         """Controls what is drawn when the game is being played"""
@@ -146,17 +151,34 @@ class Game:
     def draw_end_scene(self):
         """Controls what is drawn on the end screen"""
 
+        # print("drawing end scene")
+        pyxel.camera() #reset camera
+
         pyxel.text(
             x = self.width//4,
             y = self.height/2, 
             s= "GAME OVER", 
             col = pyxel.frame_count % 16)  #cycle through color options
+        
+        pyxel.text(
+            x = self.width//2 - 60, 
+            y = self.height/1.5, 
+            s = f"- time taken: {round(self.end_time - self.start_time,2)} seconds-", 
+            col = 13)
+        
+        # if pyxel.btnp(pyxel.KEY_RETURN):
+        #     self.scene = "start_screen"
+        #     self.score = 0
+        #     self.tile_map = 0
+        #     self.coin_list = []
+        #     self.player.set_pos(16, 104)
+        #     self.setup_map_sprites()
     
 
     def increase_level(self):
         self.tile_map = 1
         self.coin_list = []
-        self.player.set_pos(16, 104)
+        # self.player.set_pos(16, 104)
         self.setup_map_sprites()
 
 
@@ -177,6 +199,7 @@ class Game:
         
         if self.score == 14 and self.scene != "end_screen":
             self.scene = "end_screen"
+            self.end_time = time()
 
         # update camera based on Player position
         self.camera.follow_player(self.player.posX, self.player.posY)
