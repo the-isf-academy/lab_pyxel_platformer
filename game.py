@@ -9,6 +9,7 @@ from coin import Coin
 from camera import Camera
 import helpers
 from time import time
+from enemy import Enemy
 
 class Game:
     def __init__(self):
@@ -27,6 +28,7 @@ class Game:
             scale = 1)
           
         self.coin_list = []
+        self.enemy_list = []
         
         self.level1_coins = 0
 
@@ -76,6 +78,20 @@ class Game:
 
                     coin.set_pos(x * 8, y * 8)              
                     self.coin_list.append(coin)
+                
+                    pyxel.tilemap(self.tile_map).pset(x, y, helpers.TRANSPARENT_TILE)  
+        
+                if tile == helpers.ENEMY_TILE:
+                    enemy = Enemy(
+                        img_bank = 0, 
+                        editX = 48, 
+                        editY = 0, 
+                        width = 8, 
+                        height = 8,
+                        scale = 1)
+
+                    enemy.set_pos(x * 8, y * 8)              
+                    self.enemy_list.append(enemy)
                 
                     pyxel.tilemap(self.tile_map).pset(x, y, helpers.TRANSPARENT_TILE)  
 
@@ -144,6 +160,9 @@ class Game:
         for coin in self.coin_list:
             if coin.active == True:
                 coin.draw()
+        
+        for enemy in self.enemy_list:
+            enemy.draw()
 
         # draws score relative to camera position 
         pyxel.text(self.camera.x, self.camera.y, f"SCORE {self.score}", helpers.BLACK) # x, y, text, color
@@ -193,6 +212,11 @@ class Game:
             if self.player.collides_with(coin) and coin.active == True:
                 self.score += 1
                 coin.set_active(False)
+
+        for enemy in self.enemy_list:
+            if self.player.collides_with(enemy) and self.end_time == 0:
+                self.scene = "end_screen"
+                self.end_time = time()
         
         if self.score == 8 and self.tile_map == 0:
             self.increase_level()
